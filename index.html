@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unsplash Images Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .stats-bar {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+        
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #eaeaea;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .image-container {
+            height: 250px;
+            overflow: hidden;
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .image-card:hover .image-container img {
+            transform: scale(1.05);
+        }
+        
+        .url-container {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        .url-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .url-header h3 {
+            color: #333;
+            font-size: 1rem;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .url-box {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .url-box:hover {
+            background: #f0f0f0;
+        }
+        
+        .actions {
+            text-align: center;
+            padding: 30px;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 10px;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📸 Unsplash Images Gallery</h1>
+            <p>All Unsplash URLs from our conversation in one place</p>
+        </div>
+        
+        <div class="stats-bar">
+            <div class="total-images">
+                <strong>Total Images: </strong><span id="imageCount">0</span>
+            </div>
+            <div class="last-updated">
+                <strong>Last Updated: </strong><span id="lastUpdated">Just now</span>
+            </div>
+        </div>
+        
+        <div id="galleryContainer" class="gallery">
+            <!-- Images will be inserted here -->
+            <div class="empty-state">
+                <div style="font-size: 4rem; margin-bottom: 20px;">🖼️</div>
+                <h2>No Images Yet</h2>
+                <p>Run the URL extractor to find Unsplash images from our conversation</p>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button class="action-btn" onclick="extractUrls()">
+                🔍 Extract URLs
+            </button>
+            <button class="action-btn" onclick="copyAllUrls()">
+                📋 Copy All URLs
+            </button>
+            <button class="action-btn" onclick="refreshGallery()">
+                🔄 Refresh Gallery
+            </button>
+        </div>
+    </div>
+    
+    <div id="notification" class="notification">
+        Copied to clipboard!
+    </div>
+
+    <script>
+        // Sample Unsplash URLs (replace with actual extracted URLs)
+        const sampleUrls = [
+            "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+            "https://images.unsplash.com/photo-1519681393784-d120267933ba",
+            "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
+            "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05",
+            "https://images.unsplash.com/photo-1501854140801-50d01698950b",
+            "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07"
+        ];
+
+        let currentUrls = [];
+
+        function extractUrls() {
+            // In a real implementation, this would parse the conversation
+            // For now, we'll use sample URLs
+            const conversationText = document.body.innerText;
+            const unsplashUrls = findUnsplashUrls(conversationText);
+            
+            currentUrls = unsplashUrls.length > 0 ? unsplashUrls : sampleUrls;
+            displayImages(currentUrls);
+            showNotification('URLs extracted successfully!');
+        }
+
+        function findUnsplashUrls(text) {
+            const unsplashRegex = /https:\/\/images\.unsplash\.com[^\s]*/g;
+            return text.match(unsplashRegex) || [];
+        }
+
+        function displayImages(urls) {
+            const gallery = document.getElementById('galleryContainer');
+            const imageCount = document.getElementById('imageCount');
+            
+            if (urls.length === 0) {
+                gallery.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🖼️</div>
+                        <h2>No Images Found</h2>
+                        <p>No Unsplash URLs found in the conversation</p>
+                    </div>
+                `;
+                imageCount.textContent = '0';
+                return;
+            }
+            
+            gallery.innerHTML = '';
+            
+            urls.forEach((url, index) => {
+                // Ensure URL has proper parameters for display
+                const displayUrl = url.includes('?') ? url : `${url}?w=600&h=400&fit=crop`;
+                const fullUrl = url.includes('?') ? url.split('?')[0] : url;
+                
+                const imageCard = document.createElement('div');
+                imageCard.className = 'image-card';
+                imageCard.innerHTML = `
+                    <div class="image-container">
+                        <img src="${displayUrl}" alt="Unsplash Image ${index + 1}" loading="lazy">
+                    </div>
+                    <div class="url-container">
+                        <div class="url-header">
+                            <h3>Image ${index + 1}</h3>
+                            <button class="copy-btn" onclick="copyUrl('${fullUrl}', ${index})">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <div class="url-box" onclick="copyUrl('${fullUrl}', ${index})">
+                            ${fullUrl}
+                        </div>
+                    </div>
+                `;
+                gallery.appendChild(imageCard);
+            });
+            
+            imageCount.textContent = urls.length;
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+        }
+
+        function copyUrl(url, index) {
+            navigator.clipboard.writeText(url).then(() => {
+                showNotification(`Copied Image ${index + 1} URL!`);
+            });
+        }
+
+        function copyAllUrls() {
+            if (currentUrls.length === 0) {
+                showNotification('No URLs to copy!');
+                return;
+            }
+            
+            const allUrls = currentUrls.join('\n');
+            navigator.clipboard.writeText(allUrls).then(() => {
+                showNotification(`Copied ${currentUrls.length} URLs to clipboard!`);
+            });
+        }
+
+        function refreshGallery() {
+            displayImages(currentUrls);
+            showNotification('Gallery refreshed!');
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize with sample data
+        window.onload = () => {
+            setTimeout(() => {
+                extractUrls();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
